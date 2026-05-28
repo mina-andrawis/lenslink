@@ -17,7 +17,8 @@ Rules:
 - 150–250 words total
 - Open with something specific to them — a real observation, not empty flattery
 - Explain concretely why professional photography would benefit their specific type of business
-- One clear, low-pressure ask at the end (30-minute call, quick portfolio peek, coffee)
+- One clear, low-pressure ask at the end (15-minute call, quick portfolio peek, coffee)
+- Offer a discounted rate for first-time clients
 - Sign off as: Mina
 - NEVER use: "I hope this email finds you well", "reaching out to", "circle back", "touch base", "synergy"`;
 
@@ -26,13 +27,13 @@ function buildSystemPrompt(writingStyle: string): string {
   return `${BASE_SYSTEM}
 
 IMPORTANT — Voice and style:
-Mina has provided samples of her own writing below. Study the vocabulary, sentence length, punctuation habits, tone, and personality. Write the email in her voice, not in polished corporate prose.
+Mina has provided samples of her own writing below. Study the vocabulary, sentence length, punctuation habits, tone, and personality. Write the email in his voice, not in polished corporate prose.
 
 --- MINA'S WRITING SAMPLES ---
 ${writingStyle.trim()}
 --- END SAMPLES ---
 
-Match her style closely. If she writes casually, be casual. If she uses short punchy sentences, do the same. The goal is that when she reads the draft, it sounds like her — not like an AI wrote it.`;
+Match his style closely. If he writes casually, be casual. If he uses short punchy sentences, do the same. The goal is that when she reads the draft, it sounds like him — not like an AI wrote it.`;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

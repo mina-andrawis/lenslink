@@ -12,12 +12,12 @@ import PipelineBoard from '@/components/contacts/PipelineBoard';
 import { StatusBadge } from '@/components/ui/Badge';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/api-client';
-import type { Contact } from '@/types';
+import type { Contact, ContactStatus } from '@/types';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 type ViewMode = 'pipeline' | 'list';
-type Tab = 'clients' | 'network';
+type Tab = 'clients' | 'past_clients' | 'network';
 
 function PhotographerCard({ p }: { p: Contact }) {
   const handle = p.instagram
@@ -136,8 +136,31 @@ export default function ContactsPage() {
     fetchContacts();
   };
 
-  const clients = contacts.filter((c) => c.type !== 'photographer');
-  const photographers = contacts.filter((c) => c.type === 'photographer');
+  const handleStatusChange = async (contactId: string, newStatus: ContactStatus) => {
+    if (!user) return;
+    // Optimistic update — move the card instantly
+    setContacts(prev => prev.map(c => c._id === contactId ? { ...c, status: newStatus } : c));
+    try {
+      await apiFetch(`/api/contacts/${contactId}`, user, {
+        method: 'PUT',
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch {
+      toast.error('Failed to update status');
+      fetchContacts();
+    }
+  };
+
+  const nonPhotographers = contacts.filter(c => c.type !== 'photographer');
+  const activeClients = nonPhotographers.filter(c => c.status !== 'past_client');
+  const pastClients = nonPhotographers.filter(c => c.status === 'past_client');
+  const photographers = contacts.filter(c => c.type === 'photographer');
+
+  const tabLabel = tab === 'clients'
+    ? `${activeClients.length} active`
+    : tab === 'past_clients'
+    ? `${pastClients.length} past clients`
+    : `${photographers.length} photographers`;
 
   return (
     <AuthGuard>
@@ -147,9 +170,7 @@ export default function ContactsPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-              <p className="text-sm text-gray-700">
-                {tab === 'clients' ? `${clients.length} clients & prospects` : `${photographers.length} photographers`}
-              </p>
+              <p className="text-sm text-gray-700">{tabLabel}</p>
             </div>
             <button
               onClick={() => setShowAdd(true)}
@@ -161,18 +182,26 @@ export default function ContactsPage() {
           </div>
 
           {/* Tabs */}
-          <div className="mb-6 flex border-b border-gray-200">
+          <div className="mb-6 flex border-b border-gray-200 overflow-x-auto">
             <button
               onClick={() => setTab('clients')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              className={`whitespace-nowrap px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 tab === 'clients' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900'
               }`}
             >
-              Clients & Prospects ({clients.length})
+              Pipeline ({activeClients.length})
+            </button>
+            <button
+              onClick={() => setTab('past_clients')}
+              className={`whitespace-nowrap px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                tab === 'past_clients' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900'
+              }`}
+            >
+              Past Clients ({pastClients.length})
             </button>
             <button
               onClick={() => setTab('network')}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              className={`whitespace-nowrap px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 tab === 'network' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-700 hover:text-gray-900'
               }`}
             >
@@ -180,9 +209,8 @@ export default function ContactsPage() {
             </button>
           </div>
 
-          {tab === 'clients' ? (
+          {tab === 'clients' && (
             <>
-              {/* Controls */}
               <div className="mb-5 flex items-center gap-3">
                 <div className="relative flex-1 max-w-sm">
                   <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
@@ -216,7 +244,7 @@ export default function ContactsPage() {
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
                 </div>
               ) : view === 'pipeline' ? (
-                <PipelineBoard contacts={clients} />
+                <PipelineBoard contacts={activeClients} onStatusChange={handleStatusChange} />
               ) : (
                 <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -230,14 +258,14 @@ export default function ContactsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {clients.length === 0 && (
+                      {activeClients.length === 0 && (
                         <tr>
                           <td colSpan={6} className="px-4 py-10 text-center text-sm text-gray-600">
-                            No contacts found. Add your first one!
+                            No contacts found.
                           </td>
                         </tr>
                       )}
-                      {clients.map((c) => (
+                      {activeClients.map((c) => (
                         <tr key={c._id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 text-sm font-medium text-gray-900">{c.name}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{c.email}</td>
@@ -258,24 +286,67 @@ export default function ContactsPage() {
                 </div>
               )}
             </>
-          ) : (
-            <>
-              {loading ? (
-                <div className="flex justify-center py-20">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-                </div>
-              ) : photographers.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-300 p-12 text-center">
-                  <p className="text-sm text-gray-700">No photographers yet. Add one to start building your network!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {photographers.map((p) => (
-                    <PhotographerCard key={p._id} p={p} />
-                  ))}
-                </div>
-              )}
-            </>
+          )}
+
+          {tab === 'past_clients' && (
+            loading ? (
+              <div className="flex justify-center py-20">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+              </div>
+            ) : pastClients.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-300 p-12 text-center">
+                <p className="text-sm text-gray-700">No past clients yet. They'll appear here once marked as Past Client.</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      {['Name', 'Email', 'Business', 'Last Contacted', ''].map((h) => (
+                        <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {pastClients.map((c) => (
+                      <tr key={c._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{c.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">{c.email}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">{c.businessName ?? '—'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {c.lastContactedAt ? format(new Date(c.lastContactedAt), 'MMM d, yyyy') : '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Link href={`/contacts/${c._id}`} className="text-xs text-indigo-600 hover:underline">
+                            View
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          )}
+
+          {tab === 'network' && (
+            loading ? (
+              <div className="flex justify-center py-20">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+              </div>
+            ) : photographers.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-300 p-12 text-center">
+                <p className="text-sm text-gray-700">No photographers yet. Add one to start building your network!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {photographers.map((p) => (
+                  <PhotographerCard key={p._id} p={p} />
+                ))}
+              </div>
+            )
           )}
         </div>
 

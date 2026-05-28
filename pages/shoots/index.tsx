@@ -169,7 +169,7 @@ export default function ShootsPage() {
   const paidShoots = shoots.filter((s) => s.paymentStatus === 'paid');
   const hasFilters = search || filterType || filterPayment;
 
-  const selectCls = 'rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
+  const selectCls = 'rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500';
 
   return (
     <AuthGuard>
@@ -199,7 +199,7 @@ export default function ShootsPage() {
                 placeholder="Search client…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-lg border border-gray-300 pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40 sm:w-48"
+                className="rounded-lg border border-gray-300 pl-8 pr-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40 sm:w-48"
               />
             </div>
 

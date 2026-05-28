@@ -13,6 +13,7 @@ import {
   SparklesIcon,
   ClipboardDocumentIcon,
   ArrowPathIcon,
+  PaperAirplaneIcon,
 } from '@heroicons/react/24/outline';
 import Layout from '@/components/Layout';
 import AuthGuard from '@/components/AuthGuard';
@@ -200,30 +201,39 @@ export default function ContactDetailPage() {
     window.location.href = mailto;
     try {
       const token = await user.getIdToken();
-      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
       await fetch('/api/logs', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ type: 'email', subject: draft.subject, body: draft.body, contactId: id }),
       });
-      if (detail.contact.status === 'lead') {
-        await fetch(`/api/contacts/${id}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({ status: 'contacted' }),
-        });
-      }
-      toast.success('Logged and status updated to Contacted');
+      toast.success('Logged to activity history');
       setShowDraft(false);
-      fetchDetail();
+      void scheduleFollowUp();
     } catch {
       toast.error('Opened in Mail but failed to log — use Log button to save manually');
+    }
+  };
+
+  const scheduleFollowUp = async () => {
+    if (!user || !id) return;
+    const d = new Date();
+    d.setDate(d.getDate() + 5);
+    try {
+      await apiFetch(`/api/contacts/${id}`, user, {
+        method: 'PUT',
+        body: JSON.stringify({ followUpDate: d.toISOString() }),
+      });
+      toast.success(`Follow-up set for ${format(d, 'MMM d')}`);
+      fetchDetail();
+    } catch {
+      toast.error('Failed to set follow-up date');
     }
   };
 
   const composeManual = () => {
     if (!detail?.contact.email) return;
     window.location.href = `mailto:${encodeURIComponent(detail.contact.email)}`;
+    void scheduleFollowUp();
   };
 
   if (loading) {
@@ -342,6 +352,14 @@ export default function ContactDetailPage() {
                 <div className="flex items-center justify-between border-b px-5 py-4">
                   <h2 className="font-semibold text-gray-900">Activity</h2>
                   <div className="flex gap-2">
+                    <button
+                      onClick={() => { void scheduleFollowUp(); }}
+                      title="Mark that you reached out (DM, text, etc.) and set a 5-day follow-up"
+                      className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                      <PaperAirplaneIcon className="h-3.5 w-3.5" />
+                      Reached out
+                    </button>
                     <button
                       onClick={composeManual}
                       disabled={!contact.email}
