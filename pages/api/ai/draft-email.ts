@@ -48,7 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const message = await anthropic.messages.create({
     model: 'claude-opus-4-7',
     max_tokens: 1024,
-    thinking: { type: 'adaptive' },
     system: SYSTEM_PROMPT,
     tools: [
       {
