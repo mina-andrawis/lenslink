@@ -7,6 +7,8 @@ import {
   EnvelopeIcon,
   ArrowRightOnRectangleIcon,
   CameraIcon,
+  CalendarDaysIcon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
@@ -15,6 +17,8 @@ const NAV = [
   { href: '/', label: 'Dashboard', icon: HomeIcon },
   { href: '/contacts', label: 'Contacts', icon: UsersIcon },
   { href: '/outreach', label: 'Outreach', icon: EnvelopeIcon },
+  { href: '/shoots', label: 'Shoots', icon: CalendarDaysIcon },
+  { href: '/pricing', label: 'Pricing', icon: BanknotesIcon },
 ];
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -62,7 +66,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
         {/* User */}
         <div className="border-t border-gray-700 px-4 py-4">
-          <div className="mb-2 truncate text-xs text-gray-400">{user?.email}</div>
+          <div className="mb-2 truncate text-xs text-gray-600">{user?.email}</div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"

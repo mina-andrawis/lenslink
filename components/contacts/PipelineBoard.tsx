@@ -23,7 +23,7 @@ export default function PipelineBoard({ contacts }: PipelineBoardProps) {
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${stage.color}`}>
               {stage.label}
             </span>
-            <span className="text-xs text-gray-400">{grouped[stage.key].length}</span>
+            <span className="text-xs text-gray-600">{grouped[stage.key].length}</span>
           </div>
           <div className="space-y-2">
             {grouped[stage.key].map((contact) => (
@@ -31,14 +31,14 @@ export default function PipelineBoard({ contacts }: PipelineBoardProps) {
                 <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                   <p className="font-medium text-sm text-gray-900 truncate">{contact.name}</p>
                   {contact.businessName && (
-                    <p className="text-xs text-gray-500 truncate">{contact.businessName}</p>
+                    <p className="text-xs text-gray-700 truncate">{contact.businessName}</p>
                   )}
-                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
                     <EnvelopeIcon className="h-3.5 w-3.5" />
                     <span className="truncate">{contact.email}</span>
                   </div>
                   {contact.phone && (
-                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
+                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-600">
                       <PhoneIcon className="h-3.5 w-3.5" />
                       <span>{contact.phone}</span>
                     </div>
@@ -61,7 +61,7 @@ export default function PipelineBoard({ contacts }: PipelineBoardProps) {
               </Link>
             ))}
             {grouped[stage.key].length === 0 && (
-              <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center text-xs text-gray-400">
+              <div className="rounded-xl border border-dashed border-gray-200 p-4 text-center text-xs text-gray-600">
                 No contacts
               </div>
             )}

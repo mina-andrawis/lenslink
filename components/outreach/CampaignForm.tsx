@@ -84,7 +84,7 @@ export default function CampaignForm({ contacts, templates, onSubmit, onCancel }
           onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
           required
           placeholder="May 2026 Outreach"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
@@ -94,7 +94,7 @@ export default function CampaignForm({ contacts, templates, onSubmit, onCancel }
           <select
             value={form.selectedTemplate}
             onChange={(e) => handleTemplateSelect(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">— Select a template —</option>
             {templates.map((t) => (
@@ -110,19 +110,19 @@ export default function CampaignForm({ contacts, templates, onSubmit, onCancel }
           value={form.subject}
           onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))}
           required
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Email Body *</label>
-        <p className="text-xs text-gray-400 mb-1">Use {'{{name}}'} for personalization</p>
+        <p className="text-xs text-gray-600 mb-1">Use {'{{name}}'} for personalization</p>
         <textarea
           value={form.body}
           onChange={(e) => setForm((p) => ({ ...p, body: e.target.value }))}
           required
           rows={8}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono"
         />
       </div>
 
@@ -146,7 +146,7 @@ export default function CampaignForm({ contacts, templates, onSubmit, onCancel }
             <button type="button" onClick={selectAll} className="text-indigo-600 hover:underline">
               Select all
             </button>
-            <button type="button" onClick={clearAll} className="text-gray-400 hover:underline">
+            <button type="button" onClick={clearAll} className="text-gray-600 hover:underline">
               Clear
             </button>
           </div>
@@ -162,12 +162,12 @@ export default function CampaignForm({ contacts, templates, onSubmit, onCancel }
               />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-800 truncate">{c.name}</p>
-                <p className="text-xs text-gray-400 truncate">{c.email}</p>
+                <p className="text-xs text-gray-600 truncate">{c.email}</p>
               </div>
             </label>
           ))}
           {filteredContacts.length === 0 && (
-            <p className="px-3 py-4 text-sm text-gray-400 text-center">No contacts match this filter</p>
+            <p className="px-3 py-4 text-sm text-gray-600 text-center">No contacts match this filter</p>
           )}
         </div>
       </div>

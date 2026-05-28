@@ -65,6 +65,52 @@ export interface OutreachLog {
   userId: string;
 }
 
+export type ShootType =
+  | 'Proposal'
+  | 'Branding'
+  | 'Event'
+  | 'Graduation'
+  | 'Real Estate'
+  | 'Family Photoshoot'
+  | 'Portrait'
+  | 'Headshots';
+
+export type PaymentStatus = 'paid' | 'unpaid' | 'pending' | 'trade';
+
+export interface Shoot {
+  _id: string;
+  shootId: string;
+  date: string;
+  contactName: string;
+  companyName?: string;
+  type: ShootType;
+  contractSigned?: boolean | null;
+  shootDuration?: number;
+  editingTime?: number;
+  feeCharged?: number;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: string;
+  paymentDate?: string;
+  deliverByDate?: string;
+  deliveryLink?: string;
+  notes?: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const SHOOT_TYPES: ShootType[] = [
+  'Proposal', 'Branding', 'Event', 'Graduation',
+  'Real Estate', 'Family Photoshoot', 'Portrait', 'Headshots',
+];
+
+export const PAYMENT_STATUSES: { key: PaymentStatus; label: string }[] = [
+  { key: 'paid', label: 'Paid' },
+  { key: 'unpaid', label: 'Unpaid' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'trade', label: 'Trade / Collab' },
+];
+
 export const PIPELINE_STAGES: { key: ContactStatus; label: string; color: string }[] = [
   { key: 'lead', label: 'Lead', color: 'bg-slate-100 text-slate-700' },
   { key: 'contacted', label: 'Contacted', color: 'bg-blue-100 text-blue-700' },

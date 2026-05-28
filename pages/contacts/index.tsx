@@ -54,7 +54,7 @@ export default function ContactsPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-              <p className="text-sm text-gray-500">{contacts.length} total</p>
+              <p className="text-sm text-gray-700">{contacts.length} total</p>
             </div>
             <button
               onClick={() => setShowAdd(true)}
@@ -68,7 +68,7 @@ export default function ContactsPage() {
           {/* Controls */}
           <div className="mb-5 flex items-center gap-3">
             <div className="relative flex-1 max-w-sm">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -106,7 +106,7 @@ export default function ContactsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     {['Name', 'Email', 'Business', 'Status', 'Follow-up', ''].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         {h}
                       </th>
                     ))}
@@ -115,7 +115,7 @@ export default function ContactsPage() {
                 <tbody className="divide-y divide-gray-200">
                   {contacts.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-10 text-center text-sm text-gray-400">
+                      <td colSpan={6} className="px-4 py-10 text-center text-sm text-gray-600">
                         No contacts found. Add your first one!
                       </td>
                     </tr>
@@ -123,10 +123,10 @@ export default function ContactsPage() {
                   {contacts.map((c) => (
                     <tr key={c._id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{c.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{c.email}</td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{c.businessName ?? '—'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{c.email}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{c.businessName ?? '—'}</td>
                       <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
+                      <td className="px-4 py-3 text-sm text-gray-700">
                         {c.followUpDate ? format(new Date(c.followUpDate), 'MMM d, yyyy') : '—'}
                       </td>
                       <td className="px-4 py-3">

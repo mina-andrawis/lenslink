@@ -52,7 +52,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
         <div>
@@ -63,7 +63,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
             value={form.email}
             onChange={handleChange}
             required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
         <div>
@@ -84,7 +84,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
             name="businessName"
             value={form.businessName}
             onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
             name="type"
             value={form.type}
             onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="prospect">Prospect</option>
             <option value="client">Client</option>
@@ -108,7 +108,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
             name="status"
             value={form.status}
             onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {PIPELINE_STAGES.map((s) => (
               <option key={s.key} value={s.key}>{s.label}</option>
@@ -124,7 +124,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
           type="date"
           value={form.followUpDate}
           onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
@@ -135,7 +135,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
           value={form.tags}
           onChange={handleChange}
           placeholder="wedding, portrait, corporate"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
@@ -146,7 +146,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
           value={form.notes}
           onChange={handleChange}
           rows={3}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
         />
       </div>
 

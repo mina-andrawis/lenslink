@@ -34,7 +34,7 @@ function StatCard({ icon: Icon, label, value, color }: {
         </div>
         <div>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
-          <p className="text-sm text-gray-500">{label}</p>
+          <p className="text-sm text-gray-700">{label}</p>
         </div>
       </div>
     </div>
@@ -60,7 +60,7 @@ export default function DashboardPage() {
         <div className="p-8">
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-sm text-gray-500">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+            <p className="text-sm text-gray-700">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
           </div>
 
           {loading ? (
@@ -87,14 +87,14 @@ export default function DashboardPage() {
                   </div>
                   <ul className="divide-y">
                     {data.overdueFollowups.length === 0 && (
-                      <li className="px-5 py-6 text-center text-sm text-gray-400">All caught up!</li>
+                      <li className="px-5 py-6 text-center text-sm text-gray-600">All caught up!</li>
                     )}
                     {data.overdueFollowups.map((c) => (
                       <li key={c._id}>
                         <Link href={`/contacts/${c._id}`} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
                           <div>
                             <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                            <p className="text-xs text-gray-500">{c.email}</p>
+                            <p className="text-xs text-gray-700">{c.email}</p>
                           </div>
                           <div className="text-right">
                             <StatusBadge status={c.status} />
@@ -118,14 +118,14 @@ export default function DashboardPage() {
                   </div>
                   <ul className="divide-y">
                     {data.upcomingFollowups.length === 0 && (
-                      <li className="px-5 py-6 text-center text-sm text-gray-400">Nothing scheduled</li>
+                      <li className="px-5 py-6 text-center text-sm text-gray-600">Nothing scheduled</li>
                     )}
                     {data.upcomingFollowups.map((c) => (
                       <li key={c._id}>
                         <Link href={`/contacts/${c._id}`} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
                           <div>
                             <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                            <p className="text-xs text-gray-500">{c.email}</p>
+                            <p className="text-xs text-gray-700">{c.email}</p>
                           </div>
                           <div className="text-right">
                             <StatusBadge status={c.status} />
@@ -151,18 +151,18 @@ export default function DashboardPage() {
                       <li key={c._id} className="flex items-center justify-between px-5 py-3">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                          <p className="text-xs text-gray-500">{c.subject}</p>
+                          <p className="text-xs text-gray-700">{c.subject}</p>
                         </div>
                         <div className="text-right">
                           <span className={`text-xs font-medium ${
                             c.status === 'sent' ? 'text-green-600' :
                             c.status === 'failed' ? 'text-red-500' :
-                            c.status === 'sending' ? 'text-amber-500' : 'text-gray-400'
+                            c.status === 'sending' ? 'text-amber-500' : 'text-gray-600'
                           }`}>
                             {c.status.charAt(0).toUpperCase() + c.status.slice(1)}
                           </span>
                           {c.status === 'sent' && (
-                            <p className="text-xs text-gray-400">{c.stats.sent}/{c.stats.total} sent</p>
+                            <p className="text-xs text-gray-600">{c.stats.sent}/{c.stats.total} sent</p>
                           )}
                         </div>
                       </li>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
               )}
             </div>
           ) : (
-            <p className="text-gray-500">Failed to load dashboard data.</p>
+            <p className="text-gray-700">Failed to load dashboard data.</p>
           )}
         </div>
       </Layout>

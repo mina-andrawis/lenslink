@@ -117,7 +117,7 @@ export default function ContactDetailPage() {
     return (
       <AuthGuard>
         <Layout>
-          <div className="p-8 text-gray-500">Contact not found.</div>
+          <div className="p-8 text-gray-700">Contact not found.</div>
         </Layout>
       </AuthGuard>
     );
@@ -130,7 +130,7 @@ export default function ContactDetailPage() {
       <Layout>
         <div className="p-8 max-w-4xl">
           {/* Back */}
-          <Link href="/contacts" className="mb-6 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors">
+          <Link href="/contacts" className="mb-6 flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors">
             <ArrowLeftIcon className="h-4 w-4" />
             Back to Contacts
           </Link>
@@ -141,13 +141,13 @@ export default function ContactDetailPage() {
               <h1 className="text-2xl font-bold text-gray-900">{contact.name}</h1>
               <div className="mt-2 flex items-center gap-3">
                 <StatusBadge status={contact.status} />
-                <span className="text-xs text-gray-400 capitalize">{contact.type}</span>
+                <span className="text-xs text-gray-600 capitalize">{contact.type}</span>
               </div>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowEdit(true)}
-                className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <PencilIcon className="h-4 w-4" />
                 Edit
@@ -168,29 +168,29 @@ export default function ContactDetailPage() {
               <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
                 <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide text-xs">Contact Info</h2>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <EnvelopeIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <EnvelopeIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
                   <a href={`mailto:${contact.email}`} className="hover:text-indigo-600 truncate">{contact.email}</a>
                 </div>
                 {contact.phone && (
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <PhoneIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <PhoneIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
                     <span>{contact.phone}</span>
                   </div>
                 )}
                 {contact.businessName && (
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <BuildingOfficeIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <BuildingOfficeIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
                     <span>{contact.businessName}</span>
                   </div>
                 )}
                 {contact.followUpDate && (
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <CalendarIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
                     <span>Follow up: {format(new Date(contact.followUpDate), 'MMM d, yyyy')}</span>
                   </div>
                 )}
                 {contact.lastContactedAt && (
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-600">
                     Last contacted: {format(new Date(contact.lastContactedAt), 'MMM d, yyyy')}
                   </p>
                 )}
@@ -205,7 +205,7 @@ export default function ContactDetailPage() {
 
               {contact.notes && (
                 <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                  <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</h2>
+                  <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-700">Notes</h2>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{contact.notes}</p>
                 </div>
               )}
@@ -226,7 +226,7 @@ export default function ContactDetailPage() {
                 </div>
                 <ul className="divide-y">
                   {logs.length === 0 && (
-                    <li className="px-5 py-8 text-center text-sm text-gray-400">No activity logged yet</li>
+                    <li className="px-5 py-8 text-center text-sm text-gray-600">No activity logged yet</li>
                   )}
                   {logs.map((log) => (
                     <li key={log._id} className="px-5 py-4">
@@ -244,7 +244,7 @@ export default function ContactDetailPage() {
                             <p className="text-sm text-gray-600 whitespace-pre-wrap line-clamp-3">{log.body}</p>
                           )}
                         </div>
-                        <span className="ml-4 flex-shrink-0 text-xs text-gray-400">
+                        <span className="ml-4 flex-shrink-0 text-xs text-gray-600">
                           {format(new Date(log.sentAt), 'MMM d, yyyy')}
                         </span>
                       </div>
@@ -269,7 +269,7 @@ export default function ContactDetailPage() {
               <select
                 value={logForm.type}
                 onChange={(e) => setLogForm((p) => ({ ...p, type: e.target.value as OutreachLog['type'] }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="note">Note</option>
                 <option value="email">Email</option>
@@ -282,7 +282,7 @@ export default function ContactDetailPage() {
               <input
                 value={logForm.subject}
                 onChange={(e) => setLogForm((p) => ({ ...p, subject: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
@@ -291,7 +291,7 @@ export default function ContactDetailPage() {
                 value={logForm.body}
                 onChange={(e) => setLogForm((p) => ({ ...p, body: e.target.value }))}
                 rows={4}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
               />
             </div>
             <div className="flex justify-end gap-3">
