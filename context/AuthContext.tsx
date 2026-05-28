@@ -28,6 +28,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
+      if (u) {
+        localStorage.setItem('lenslink_authed', '1');
+      } else {
+        localStorage.removeItem('lenslink_authed');
+      }
     });
     return unsub;
   }, []);
