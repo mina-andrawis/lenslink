@@ -290,7 +290,8 @@ export default function ShootsPage() {
                       <SortHeader label="Client"    sortKey="contactName"   current={sortKey} dir={sortDir} onSort={handleSort} />
                       <SortHeader label="Type"      sortKey="type"          current={sortKey} dir={sortDir} onSort={handleSort} />
                       <th className="px-4 py-3">Contract</th>
-                      <th className="px-4 py-3 text-right">Hrs</th>
+                      <th className="px-4 py-3 text-right">Shoot Hrs</th>
+                      <th className="px-4 py-3 text-right">Edit Hrs</th>
                       <SortHeader label="Fee"       sortKey="feeCharged"    current={sortKey} dir={sortDir} onSort={handleSort} className="text-right" />
                       <SortHeader label="Eff. Rate" sortKey="effectiveRate" current={sortKey} dir={sortDir} onSort={handleSort} className="text-right" />
                       <th className="px-4 py-3">Payment</th>
@@ -315,7 +316,10 @@ export default function ShootsPage() {
                           {s.contractSigned === true ? '✓' : s.contractSigned === false ? '✗' : '—'}
                         </td>
                         <td className="px-4 py-3 text-right text-gray-600">
-                          {((s.shootDuration ?? 0) + (s.editingTime ?? 0)) || '—'}
+                          {s.shootDuration ?? '—'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-600">
+                          {s.editingTime ?? '—'}
                         </td>
                         <td className="px-4 py-3 text-right font-medium text-gray-900">
                           {s.feeCharged ? `$${s.feeCharged.toLocaleString()}` : '—'}

@@ -5,10 +5,11 @@ import { useAuth } from '@/context/AuthContext';
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  // Captured once on mount — true if a previous session was cached
-  const hadCachedSession = useRef(
-    typeof window !== 'undefined' && !!localStorage.getItem('lenslink_authed')
-  );
+  const hadCachedSession = useRef(false);
+
+  useEffect(() => {
+    hadCachedSession.current = !!localStorage.getItem('lenslink_authed');
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');

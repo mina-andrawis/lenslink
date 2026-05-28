@@ -57,6 +57,8 @@ export default function ContactDetailPage() {
   const [showDraft, setShowDraft] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [draft, setDraft] = useState<EmailDraft | null>(null);
+  const [writingStyle, setWritingStyle] = useState('');
+  const [styleLoaded, setStyleLoaded] = useState(false);
 
   const fetchDetail = async () => {
     if (!user || !id) return;
@@ -114,19 +116,33 @@ export default function ContactDetailPage() {
     }
   };
 
+  const openDraftModal = async () => {
+    setShowDraft(true);
+    setDraft(null);
+    if (!styleLoaded && user) {
+      try {
+        const data = await apiFetch<{ writingStyle: string }>('/api/settings', user);
+        setWritingStyle(data.writingStyle ?? '');
+      } catch { /* use empty default */ }
+      setStyleLoaded(true);
+    }
+  };
+
   const generateDraft = async () => {
     if (!user || !id) return;
     setDrafting(true);
     setDraft(null);
-    setShowDraft(true);
     try {
       const token = await user.getIdToken();
+      // Save writing style before generating
+      await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ writingStyle }),
+      });
       const res = await fetch('/api/ai/draft-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ contactId: id }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -134,7 +150,6 @@ export default function ContactDetailPage() {
       setDraft(data);
     } catch {
       toast.error('Failed to generate draft');
-      setShowDraft(false);
     } finally {
       setDrafting(false);
     }
@@ -286,7 +301,7 @@ export default function ContactDetailPage() {
                   <h2 className="font-semibold text-gray-900">Activity</h2>
                   <div className="flex gap-2">
                     <button
-                      onClick={generateDraft}
+                      onClick={openDraftModal}
                       className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100 transition-colors"
                     >
                       <SparklesIcon className="h-3.5 w-3.5" />
@@ -381,7 +396,7 @@ export default function ContactDetailPage() {
         </Modal>
 
         {/* AI Draft Modal */}
-        <Modal open={showDraft} onClose={() => !drafting && setShowDraft(false)} title="AI-Drafted Email">
+        <Modal open={showDraft} onClose={() => !drafting && setShowDraft(false)} title="Draft with AI">
           {drafting ? (
             <div className="flex flex-col items-center gap-4 py-10">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
@@ -433,7 +448,38 @@ export default function ContactDetailPage() {
                 </div>
               </div>
             </div>
-          ) : null}
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your writing style
+                  <span className="ml-1.5 text-xs font-normal text-gray-500">(saved for all future drafts)</span>
+                </label>
+                <textarea
+                  value={writingStyle}
+                  onChange={(e) => setWritingStyle(e.target.value)}
+                  rows={8}
+                  placeholder={`Paste a few examples of how you actually write — emails, captions, DMs, anything. The more you give, the more the draft will sound like you.\n\nExample:\n"Hey! Saw your café on Instagram and absolutely love the vibe you've created. I'm a photographer based in Charleston and would love to chat about capturing some content for you…"`}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowDraft(false)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={generateDraft}
+                  className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 transition-colors"
+                >
+                  <SparklesIcon className="h-4 w-4" />
+                  Generate Draft
+                </button>
+              </div>
+            </div>
+          )}
         </Modal>
       </Layout>
     </AuthGuard>

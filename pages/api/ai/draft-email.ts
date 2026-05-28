@@ -3,10 +3,11 @@ import Anthropic from '@anthropic-ai/sdk';
 import { getUserId } from '@/lib/auth-middleware';
 import { connectDB } from '@/lib/mongodb';
 import Contact from '@/models/Contact';
+import UserSettings from '@/models/UserSettings';
 
 const anthropic = new Anthropic();
 
-const SYSTEM_PROMPT = `You are helping Mina Andrawis, a photographer in Charleston, SC, write personalized cold outreach emails to potential clients and business contacts.
+const BASE_SYSTEM = `You are helping Mina Andrawis, a photographer in Charleston, SC, write personalized cold outreach emails to potential clients and business contacts.
 
 Mina shoots: portraits, headshots, branding, events, real estate, family sessions, and proposals.
 
@@ -20,6 +21,20 @@ Rules:
 - Sign off as: Mina
 - NEVER use: "I hope this email finds you well", "reaching out to", "circle back", "touch base", "synergy"`;
 
+function buildSystemPrompt(writingStyle: string): string {
+  if (!writingStyle.trim()) return BASE_SYSTEM;
+  return `${BASE_SYSTEM}
+
+IMPORTANT — Voice and style:
+Mina has provided samples of her own writing below. Study the vocabulary, sentence length, punctuation habits, tone, and personality. Write the email in her voice, not in polished corporate prose.
+
+--- MINA'S WRITING SAMPLES ---
+${writingStyle.trim()}
+--- END SAMPLES ---
+
+Match her style closely. If she writes casually, be casual. If she uses short punchy sentences, do the same. The goal is that when she reads the draft, it sounds like her — not like an AI wrote it.`;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
@@ -30,8 +45,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!contactId) return res.status(400).json({ error: 'contactId required' });
 
   await connectDB();
-  const contact = await Contact.findOne({ _id: contactId, userId }).lean() as Record<string, unknown> | null;
+
+  const [contact, settings] = await Promise.all([
+    Contact.findOne({ _id: contactId, userId }).lean() as Promise<Record<string, unknown> | null>,
+    UserSettings.findOne({ userId }).lean() as Promise<Record<string, unknown> | null>,
+  ]);
+
   if (!contact) return res.status(404).json({ error: 'Contact not found' });
+
+  const writingStyle = (settings?.writingStyle as string) ?? '';
 
   const details = [
     `Name: ${contact.name}`,
@@ -48,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const message = await anthropic.messages.create({
     model: 'claude-opus-4-7',
     max_tokens: 1024,
-    system: SYSTEM_PROMPT,
+    system: buildSystemPrompt(writingStyle),
     tools: [
       {
         name: 'draft_email',
