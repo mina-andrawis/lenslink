@@ -193,6 +193,16 @@ export default function ContactDetailPage() {
     navigator.clipboard.writeText(text).then(() => toast.success('Copied to clipboard'));
   };
 
+  const openInGmail = () => {
+    if (!draft || !detail) return;
+    const url = new URL('https://mail.google.com/mail/');
+    url.searchParams.set('view', 'cm');
+    url.searchParams.set('to', detail.contact.email);
+    url.searchParams.set('su', draft.subject);
+    url.searchParams.set('body', draft.body);
+    window.open(url.toString(), '_blank');
+  };
+
   if (loading) {
     return (
       <AuthGuard>
@@ -455,12 +465,19 @@ export default function ContactDetailPage() {
                     Copy
                   </button>
                   <button
+                    onClick={openInGmail}
+                    className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+                  >
+                    <EnvelopeIcon className="h-4 w-4" />
+                    Open in Gmail
+                  </button>
+                  <button
                     onClick={logDraft}
                     disabled={savingLog}
                     className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50 transition-colors"
                   >
                     <PlusIcon className="h-4 w-4" />
-                    {savingLog ? 'Saving…' : 'Log as Activity'}
+                    {savingLog ? 'Saving…' : 'Log'}
                   </button>
                 </div>
               </div>
