@@ -16,6 +16,10 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
     type: (initial?.type ?? 'prospect') as ContactType,
     status: (initial?.status ?? 'lead') as ContactStatus,
     businessName: initial?.businessName ?? '',
+    instagram: initial?.instagram ?? '',
+    website: initial?.website ?? '',
+    specialty: initial?.specialty ?? '',
+    city: initial?.city ?? '',
     notes: initial?.notes ?? '',
     followUpDate: initial?.followUpDate ? initial.followUpDate.slice(0, 10) : '',
     tags: initial?.tags?.join(', ') ?? '',
@@ -100,6 +104,7 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
           >
             <option value="prospect">Prospect</option>
             <option value="client">Client</option>
+            <option value="photographer">Photographer</option>
           </select>
         </div>
         <div>
@@ -116,6 +121,55 @@ export default function ContactForm({ initial, onSubmit, onCancel }: ContactForm
           </select>
         </div>
       </div>
+
+      {form.type === 'photographer' && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+              <input
+                name="instagram"
+                value={form.instagram}
+                onChange={handleChange}
+                placeholder="@username"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+              <input
+                name="website"
+                value={form.website}
+                onChange={handleChange}
+                placeholder="https://..."
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
+              <input
+                name="specialty"
+                value={form.specialty}
+                onChange={handleChange}
+                placeholder="Wedding, Portrait…"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <input
+                name="city"
+                value={form.city}
+                onChange={handleChange}
+                placeholder="New York, NY"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Follow-up Date</label>

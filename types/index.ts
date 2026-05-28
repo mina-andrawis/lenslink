@@ -6,7 +6,7 @@ export type ContactStatus =
   | 'past_client'
   | 'not_interested';
 
-export type ContactType = 'prospect' | 'client';
+export type ContactType = 'prospect' | 'client' | 'photographer';
 
 export interface Contact {
   _id: string;
@@ -16,6 +16,10 @@ export interface Contact {
   type: ContactType;
   status: ContactStatus;
   businessName?: string;
+  instagram?: string;
+  website?: string;
+  specialty?: string;
+  city?: string;
   notes?: string;
   lastContactedAt?: string;
   followUpDate?: string;
