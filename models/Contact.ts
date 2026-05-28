@@ -1,0 +1,46 @@
+import mongoose, { Schema, Document, Model } from 'mongoose';
+
+export interface IContact extends Document {
+  name: string;
+  email: string;
+  phone?: string;
+  type: 'prospect' | 'client';
+  status: 'lead' | 'contacted' | 'proposal_sent' | 'booked' | 'past_client' | 'not_interested';
+  businessName?: string;
+  notes?: string;
+  lastContactedAt?: Date;
+  followUpDate?: Date;
+  tags: string[];
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ContactSchema = new Schema<IContact>(
+  {
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true, lowercase: true },
+    phone: { type: String, trim: true },
+    type: { type: String, enum: ['prospect', 'client'], default: 'prospect' },
+    status: {
+      type: String,
+      enum: ['lead', 'contacted', 'proposal_sent', 'booked', 'past_client', 'not_interested'],
+      default: 'lead',
+    },
+    businessName: { type: String, trim: true },
+    notes: { type: String },
+    lastContactedAt: { type: Date },
+    followUpDate: { type: Date },
+    tags: [{ type: String }],
+    userId: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
+ContactSchema.index({ userId: 1, status: 1 });
+ContactSchema.index({ userId: 1, followUpDate: 1 });
+
+const Contact: Model<IContact> =
+  mongoose.models.Contact ?? mongoose.model<IContact>('Contact', ContactSchema);
+
+export default Contact;
