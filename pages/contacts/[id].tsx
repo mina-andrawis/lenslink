@@ -193,14 +193,10 @@ export default function ContactDetailPage() {
     navigator.clipboard.writeText(text).then(() => toast.success('Copied to clipboard'));
   };
 
-  const openInGmail = () => {
+  const openInMail = () => {
     if (!draft || !detail) return;
-    const url = new URL('https://mail.google.com/mail/');
-    url.searchParams.set('view', 'cm');
-    url.searchParams.set('to', detail.contact.email);
-    url.searchParams.set('su', draft.subject);
-    url.searchParams.set('body', draft.body);
-    window.open(url.toString(), '_blank');
+    const mailto = `mailto:${encodeURIComponent(detail.contact.email)}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}`;
+    window.location.href = mailto;
   };
 
   if (loading) {
@@ -465,11 +461,11 @@ export default function ContactDetailPage() {
                     Copy
                   </button>
                   <button
-                    onClick={openInGmail}
+                    onClick={openInMail}
                     className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
                   >
                     <EnvelopeIcon className="h-4 w-4" />
-                    Open in Gmail
+                    Open in Mail
                   </button>
                   <button
                     onClick={logDraft}
