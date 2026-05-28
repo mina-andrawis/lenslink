@@ -119,26 +119,35 @@ export default function ContactDetailPage() {
   const openDraftModal = async () => {
     setShowDraft(true);
     setDraft(null);
+
+    let resolvedStyle = writingStyle;
     if (!styleLoaded && user) {
       try {
         const data = await apiFetch<{ writingStyle: string }>('/api/settings', user);
-        setWritingStyle(data.writingStyle ?? '');
+        resolvedStyle = data.writingStyle ?? '';
+        setWritingStyle(resolvedStyle);
       } catch { /* use empty default */ }
       setStyleLoaded(true);
     }
+
+    // Style already saved — skip straight to generating
+    if (resolvedStyle.trim()) {
+      generateDraft(resolvedStyle);
+    }
+    // Otherwise the modal will show the style textarea (first-time setup)
   };
 
-  const generateDraft = async () => {
+  const generateDraft = async (styleOverride?: string) => {
     if (!user || !id) return;
+    const styleToUse = styleOverride !== undefined ? styleOverride : writingStyle;
     setDrafting(true);
     setDraft(null);
     try {
       const token = await user.getIdToken();
-      // Save writing style before generating
       await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ writingStyle }),
+        body: JSON.stringify({ writingStyle: styleToUse }),
       });
       const res = await fetch('/api/ai/draft-email', {
         method: 'POST',
@@ -422,13 +431,21 @@ export default function ContactDetailPage() {
                 />
               </div>
               <div className="flex items-center justify-between pt-1">
-                <button
-                  onClick={generateDraft}
-                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  <ArrowPathIcon className="h-3.5 w-3.5" />
-                  Regenerate
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => { void generateDraft(); }}
+                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <ArrowPathIcon className="h-3.5 w-3.5" />
+                    Regenerate
+                  </button>
+                  <button
+                    onClick={() => setDraft(null)}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    Edit style
+                  </button>
+                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={copyDraft}
@@ -453,7 +470,7 @@ export default function ContactDetailPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Your writing style
-                  <span className="ml-1.5 text-xs font-normal text-gray-500">(saved for all future drafts)</span>
+                  <span className="ml-1.5 text-xs font-normal text-gray-500">— set once, used for all future drafts</span>
                 </label>
                 <textarea
                   value={writingStyle}
@@ -471,7 +488,7 @@ export default function ContactDetailPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={generateDraft}
+                  onClick={() => { void generateDraft(); }}
                   className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 transition-colors"
                 >
                   <SparklesIcon className="h-4 w-4" />
