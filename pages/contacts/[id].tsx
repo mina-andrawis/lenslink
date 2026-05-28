@@ -194,10 +194,23 @@ export default function ContactDetailPage() {
     navigator.clipboard.writeText(text).then(() => toast.success('Copied to clipboard'));
   };
 
-  const openInMail = () => {
-    if (!draft || !detail) return;
+  const openInMail = async () => {
+    if (!draft || !detail || !user) return;
     const mailto = `mailto:${encodeURIComponent(detail.contact.email)}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}`;
     window.location.href = mailto;
+    try {
+      const token = await user.getIdToken();
+      await fetch('/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ type: 'email', subject: draft.subject, body: draft.body, contactId: id }),
+      });
+      toast.success('Logged to activity history');
+      setShowDraft(false);
+      fetchDetail();
+    } catch {
+      toast.error('Opened in Mail but failed to log — use Log button to save manually');
+    }
   };
 
   const composeManual = () => {
@@ -488,7 +501,7 @@ export default function ContactDetailPage() {
                     Copy
                   </button>
                   <button
-                    onClick={openInMail}
+                    onClick={() => { void openInMail(); }}
                     className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
                   >
                     <EnvelopeIcon className="h-4 w-4" />
