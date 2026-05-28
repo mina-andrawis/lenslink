@@ -59,6 +59,7 @@ export default function ContactDetailPage() {
   const [draft, setDraft] = useState<EmailDraft | null>(null);
   const [writingStyle, setWritingStyle] = useState('');
   const [styleLoaded, setStyleLoaded] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<OutreachLog | null>(null);
 
   const fetchDetail = async () => {
     if (!user || !id) return;
@@ -358,7 +359,11 @@ export default function ContactDetailPage() {
                     <li className="px-5 py-8 text-center text-sm text-gray-600">No activity logged yet</li>
                   )}
                   {logs.map((log) => (
-                    <li key={log._id} className="px-5 py-4">
+                    <li
+                      key={log._id}
+                      onClick={() => setSelectedLog(log)}
+                      className="px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -370,10 +375,10 @@ export default function ContactDetailPage() {
                             )}
                           </div>
                           {log.body && (
-                            <p className="text-sm text-gray-600 whitespace-pre-wrap line-clamp-3">{log.body}</p>
+                            <p className="text-sm text-gray-600 line-clamp-2">{log.body}</p>
                           )}
                         </div>
-                        <span className="ml-4 flex-shrink-0 text-xs text-gray-600">
+                        <span className="ml-4 flex-shrink-0 text-xs text-gray-500">
                           {format(new Date(log.sentAt), 'MMM d, yyyy')}
                         </span>
                       </div>
@@ -528,6 +533,37 @@ export default function ContactDetailPage() {
                 >
                   <SparklesIcon className="h-4 w-4" />
                   Generate Draft
+                </button>
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        {/* Activity detail modal */}
+        <Modal
+          open={!!selectedLog}
+          onClose={() => setSelectedLog(null)}
+          title={selectedLog?.subject || (selectedLog?.type ? selectedLog.type.charAt(0).toUpperCase() + selectedLog.type.slice(1) : 'Activity')}
+        >
+          {selectedLog && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${LOG_TYPE_COLORS[selectedLog.type] ?? 'bg-gray-100 text-gray-700'}`}>
+                  {selectedLog.type}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {format(new Date(selectedLog.sentAt), 'MMM d, yyyy')}
+                </span>
+              </div>
+              {selectedLog.body && (
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{selectedLog.body}</p>
+              )}
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setSelectedLog(null)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Close
                 </button>
               </div>
             </div>
