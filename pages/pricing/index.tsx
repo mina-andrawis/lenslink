@@ -68,7 +68,7 @@ export default function PricingPage() {
   return (
     <AuthGuard>
       <Layout>
-        <div className="p-8 space-y-8">
+        <div className="p-4 md:p-8 space-y-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Pricing</h1>
             <p className="text-sm text-gray-700">Rate reference and comparison against your actual shoots</p>

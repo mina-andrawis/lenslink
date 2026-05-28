@@ -174,7 +174,7 @@ export default function ShootsPage() {
   return (
     <AuthGuard>
       <Layout>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Header */}
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -185,12 +185,13 @@ export default function ShootsPage() {
             </div>
             <button onClick={openNew} className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
               <PlusIcon className="h-4 w-4" />
-              Add Shoot
+              <span className="hidden sm:inline">Add Shoot</span>
+              <span className="sm:hidden">Add</span>
             </button>
           </div>
 
           {/* Filter bar */}
-          <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
               <input
@@ -198,7 +199,7 @@ export default function ShootsPage() {
                 placeholder="Search client…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-lg border border-gray-300 pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48"
+                className="rounded-lg border border-gray-300 pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40 sm:w-48"
               />
             </div>
 
@@ -221,13 +222,11 @@ export default function ShootsPage() {
                 Clear
               </button>
             )}
-
             {hasFilters && (
               <span className="text-sm text-gray-600">{filtered.length} of {shoots.length}</span>
             )}
           </div>
 
-          {/* Table */}
           {loading ? (
             <div className="flex justify-center py-20">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
@@ -237,79 +236,125 @@ export default function ShootsPage() {
               {hasFilters ? 'No shoots match your filters.' : 'No shoots yet. Add your first one.'}
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-700">
-                    <th className="px-4 py-3">ID</th>
-                    <SortHeader label="Date"     sortKey="date"          current={sortKey} dir={sortDir} onSort={handleSort} />
-                    <SortHeader label="Client"   sortKey="contactName"   current={sortKey} dir={sortDir} onSort={handleSort} />
-                    <SortHeader label="Type"     sortKey="type"          current={sortKey} dir={sortDir} onSort={handleSort} />
-                    <th className="px-4 py-3">Contract</th>
-                    <th className="px-4 py-3 text-right">Hrs</th>
-                    <SortHeader label="Fee"      sortKey="feeCharged"    current={sortKey} dir={sortDir} onSort={handleSort} className="text-right" />
-                    <SortHeader label="Eff. Rate" sortKey="effectiveRate" current={sortKey} dir={sortDir} onSort={handleSort} className="text-right" />
-                    <th className="px-4 py-3">Payment</th>
-                    <th className="px-4 py-3">Deliver By</th>
-                    <th className="px-4 py-3">Link</th>
-                    <th className="px-4 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filtered.map((s) => (
-                    <tr key={s._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-gray-700">{s.shootId}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-gray-700">
-                        {format(new Date(s.date), 'MMM d, yyyy')}
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-gray-900">{s.contactName}</p>
+            <>
+              {/* Mobile card list */}
+              <div className="md:hidden space-y-3">
+                {filtered.map((s) => (
+                  <div key={s._id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900">{s.contactName}</p>
                         {s.companyName && <p className="text-xs text-gray-600">{s.companyName}</p>}
-                      </td>
-                      <td className="px-4 py-3 text-gray-700">{s.type}</td>
-                      <td className="px-4 py-3 text-center">
-                        {s.contractSigned === true ? '✓' : s.contractSigned === false ? '✗' : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-600">
-                        {((s.shootDuration ?? 0) + (s.editingTime ?? 0)) || '—'}
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium text-gray-900">
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button onClick={() => openEdit(s)} className="text-gray-500 hover:text-indigo-600">
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDelete(s)} className="text-gray-500 hover:text-red-500">
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-gray-600">{format(new Date(s.date), 'MMM d, yyyy')}</span>
+                      <span className="text-xs text-gray-400">·</span>
+                      <span className="text-xs text-gray-700">{s.type}</span>
+                      {s.paymentStatus && (
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PAYMENT_COLORS[s.paymentStatus] ?? ''}`}>
+                          {PAYMENT_LABELS[s.paymentStatus]}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-2 flex items-center gap-4 text-sm">
+                      <span className="font-medium text-gray-900">
                         {s.feeCharged ? `$${s.feeCharged.toLocaleString()}` : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-600">{fmtRate(s)}</td>
-                      <td className="px-4 py-3">
-                        {s.paymentStatus && (
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PAYMENT_COLORS[s.paymentStatus] ?? ''}`}>
-                            {PAYMENT_LABELS[s.paymentStatus] ?? s.paymentStatus}
-                            {s.paymentMethod ? ` · ${s.paymentMethod}` : ''}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-gray-700 text-xs">
-                        {s.deliverByDate ? format(new Date(s.deliverByDate), 'MMM d') : '—'}
-                      </td>
-                      <td className="px-4 py-3">
-                        {s.deliveryLink && (
-                          <a href={s.deliveryLink} target="_blank" rel="noreferrer" className="text-indigo-500 hover:text-indigo-700">
-                            <LinkIcon className="h-4 w-4" />
-                          </a>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => openEdit(s)} className="text-gray-600 hover:text-indigo-600 transition-colors">
-                            <PencilIcon className="h-4 w-4" />
-                          </button>
-                          <button onClick={() => handleDelete(s)} className="text-gray-600 hover:text-red-500 transition-colors">
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
+                      </span>
+                      <span className="text-gray-600 text-xs">{fmtRate(s)}</span>
+                      {s.deliveryLink && (
+                        <a href={s.deliveryLink} target="_blank" rel="noreferrer" className="ml-auto text-indigo-500">
+                          <LinkIcon className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-700">
+                      <th className="px-4 py-3">ID</th>
+                      <SortHeader label="Date"      sortKey="date"          current={sortKey} dir={sortDir} onSort={handleSort} />
+                      <SortHeader label="Client"    sortKey="contactName"   current={sortKey} dir={sortDir} onSort={handleSort} />
+                      <SortHeader label="Type"      sortKey="type"          current={sortKey} dir={sortDir} onSort={handleSort} />
+                      <th className="px-4 py-3">Contract</th>
+                      <th className="px-4 py-3 text-right">Hrs</th>
+                      <SortHeader label="Fee"       sortKey="feeCharged"    current={sortKey} dir={sortDir} onSort={handleSort} className="text-right" />
+                      <SortHeader label="Eff. Rate" sortKey="effectiveRate" current={sortKey} dir={sortDir} onSort={handleSort} className="text-right" />
+                      <th className="px-4 py-3">Payment</th>
+                      <th className="px-4 py-3">Deliver By</th>
+                      <th className="px-4 py-3">Link</th>
+                      <th className="px-4 py-3"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filtered.map((s) => (
+                      <tr key={s._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 font-mono text-xs text-gray-700">{s.shootId}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">
+                          {format(new Date(s.date), 'MMM d, yyyy')}
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-gray-900">{s.contactName}</p>
+                          {s.companyName && <p className="text-xs text-gray-600">{s.companyName}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">{s.type}</td>
+                        <td className="px-4 py-3 text-center">
+                          {s.contractSigned === true ? '✓' : s.contractSigned === false ? '✗' : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-600">
+                          {((s.shootDuration ?? 0) + (s.editingTime ?? 0)) || '—'}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium text-gray-900">
+                          {s.feeCharged ? `$${s.feeCharged.toLocaleString()}` : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-600">{fmtRate(s)}</td>
+                        <td className="px-4 py-3">
+                          {s.paymentStatus && (
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PAYMENT_COLORS[s.paymentStatus] ?? ''}`}>
+                              {PAYMENT_LABELS[s.paymentStatus] ?? s.paymentStatus}
+                              {s.paymentMethod ? ` · ${s.paymentMethod}` : ''}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700 text-xs">
+                          {s.deliverByDate ? format(new Date(s.deliverByDate), 'MMM d') : '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          {s.deliveryLink && (
+                            <a href={s.deliveryLink} target="_blank" rel="noreferrer" className="text-indigo-500 hover:text-indigo-700">
+                              <LinkIcon className="h-4 w-4" />
+                            </a>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => openEdit(s)} className="text-gray-600 hover:text-indigo-600 transition-colors">
+                              <PencilIcon className="h-4 w-4" />
+                            </button>
+                            <button onClick={() => handleDelete(s)} className="text-gray-600 hover:text-red-500 transition-colors">
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
 

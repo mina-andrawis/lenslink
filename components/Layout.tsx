@@ -33,40 +33,38 @@ export default function Layout({ children }: { children: ReactNode }) {
     }
   };
 
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/' && pathname.startsWith(href));
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="flex w-60 flex-col bg-gray-900 text-white">
-        {/* Logo */}
+
+      {/* Desktop sidebar — hidden on mobile */}
+      <aside className="hidden md:flex w-60 flex-col bg-gray-900 text-white flex-shrink-0">
         <div className="flex items-center gap-2 px-6 py-5 border-b border-gray-700">
           <CameraIcon className="h-6 w-6 text-indigo-400" />
           <span className="text-lg font-semibold tracking-tight">LensLink</span>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {NAV.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || (href !== '/' && pathname.startsWith(href));
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                }`}
-              >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                {label}
-              </Link>
-            );
-          })}
+          {NAV.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                isActive(href)
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`}
+            >
+              <Icon className="h-5 w-5 flex-shrink-0" />
+              {label}
+            </Link>
+          ))}
         </nav>
 
-        {/* User */}
         <div className="border-t border-gray-700 px-4 py-4">
-          <div className="mb-2 truncate text-xs text-gray-600">{user?.email}</div>
+          <div className="mb-2 truncate text-xs text-gray-400">{user?.email}</div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"
@@ -77,8 +75,25 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      {/* Main content — extra bottom padding on mobile for the tab bar */}
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">{children}</main>
+
+      {/* Mobile bottom tab bar — hidden on desktop */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around bg-gray-900 border-t border-gray-700 px-2 py-2">
+        {NAV.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
+              isActive(href) ? 'text-indigo-400' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <Icon className="h-5 w-5" />
+            <span className="text-[10px] font-medium">{label}</span>
+          </Link>
+        ))}
+      </nav>
+
     </div>
   );
 }

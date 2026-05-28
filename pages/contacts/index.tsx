@@ -49,7 +49,7 @@ export default function ContactsPage() {
   return (
     <AuthGuard>
       <Layout>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* Header */}
           <div className="mb-6 flex items-center justify-between">
             <div>

@@ -76,7 +76,7 @@ export default function ShootForm({ initial = {}, onSubmit, onCancel }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls}>Shoot ID</label>
           <input className={inputCls} value={form.shootId} onChange={(e) => set('shootId', e.target.value)} placeholder="S-0016" required />
@@ -87,7 +87,7 @@ export default function ShootForm({ initial = {}, onSubmit, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls}>Contact Name *</label>
           <input className={inputCls} value={form.contactName} onChange={(e) => set('contactName', e.target.value)} required />
@@ -98,7 +98,7 @@ export default function ShootForm({ initial = {}, onSubmit, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls}>Shoot Type *</label>
           <select className={inputCls} value={form.type} onChange={(e) => set('type', e.target.value)} required>
@@ -114,7 +114,7 @@ export default function ShootForm({ initial = {}, onSubmit, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className={labelCls}>Shoot Duration (hrs)</label>
           <input type="number" step="0.25" min="0" className={inputCls} value={form.shootDuration} onChange={(e) => set('shootDuration', e.target.value)} />
@@ -131,7 +131,7 @@ export default function ShootForm({ initial = {}, onSubmit, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className={labelCls}>Fee Charged ($)</label>
           <input type="number" step="0.01" min="0" className={inputCls} value={form.feeCharged} onChange={(e) => set('feeCharged', e.target.value)} />
@@ -148,7 +148,7 @@ export default function ShootForm({ initial = {}, onSubmit, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls}>Payment Date</label>
           <input type="date" className={inputCls} value={form.paymentDate} onChange={(e) => set('paymentDate', e.target.value)} />

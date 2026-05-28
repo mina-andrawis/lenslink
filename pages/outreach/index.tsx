@@ -117,7 +117,7 @@ export default function OutreachPage() {
   return (
     <AuthGuard>
       <Layout>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Outreach</h1>
             <div className="flex gap-2">

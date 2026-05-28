@@ -128,7 +128,7 @@ export default function ContactDetailPage() {
   return (
     <AuthGuard>
       <Layout>
-        <div className="p-8 max-w-4xl">
+        <div className="p-4 md:p-8 max-w-4xl">
           {/* Back */}
           <Link href="/contacts" className="mb-6 flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors">
             <ArrowLeftIcon className="h-4 w-4" />
