@@ -200,12 +200,20 @@ export default function ContactDetailPage() {
     window.location.href = mailto;
     try {
       const token = await user.getIdToken();
+      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
       await fetch('/api/logs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers,
         body: JSON.stringify({ type: 'email', subject: draft.subject, body: draft.body, contactId: id }),
       });
-      toast.success('Logged to activity history');
+      if (detail.contact.status === 'lead') {
+        await fetch(`/api/contacts/${id}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ status: 'contacted' }),
+        });
+      }
+      toast.success('Logged and status updated to Contacted');
       setShowDraft(false);
       fetchDetail();
     } catch {
