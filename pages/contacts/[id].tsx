@@ -199,6 +199,11 @@ export default function ContactDetailPage() {
     window.location.href = mailto;
   };
 
+  const composeManual = () => {
+    if (!detail?.contact.email) return;
+    window.location.href = `mailto:${encodeURIComponent(detail.contact.email)}`;
+  };
+
   if (loading) {
     return (
       <AuthGuard>
@@ -316,8 +321,19 @@ export default function ContactDetailPage() {
                   <h2 className="font-semibold text-gray-900">Activity</h2>
                   <div className="flex gap-2">
                     <button
+                      onClick={composeManual}
+                      disabled={!contact.email}
+                      title={!contact.email ? 'No email address on file' : 'Open blank compose in Mail'}
+                      className="flex items-center gap-1.5 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <EnvelopeIcon className="h-3.5 w-3.5" />
+                      Compose
+                    </button>
+                    <button
                       onClick={openDraftModal}
-                      className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100 transition-colors"
+                      disabled={!contact.email}
+                      title={!contact.email ? 'No email address on file' : 'Draft a personalized email with AI'}
+                      className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       <SparklesIcon className="h-3.5 w-3.5" />
                       Draft with AI
@@ -331,6 +347,12 @@ export default function ContactDetailPage() {
                     </button>
                   </div>
                 </div>
+                {!contact.email && (
+                  <div className="flex items-center gap-2 px-5 py-2.5 bg-amber-50 border-b border-amber-100 text-xs text-amber-700">
+                    <span>⚠</span>
+                    No email address on file — add one to enable outreach.
+                  </div>
+                )}
                 <ul className="divide-y">
                   {logs.length === 0 && (
                     <li className="px-5 py-8 text-center text-sm text-gray-600">No activity logged yet</li>
