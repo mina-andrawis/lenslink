@@ -314,7 +314,7 @@ export default function ShootsPage() {
         </div>
 
         <Modal
-          isOpen={modalOpen}
+          open={modalOpen}
           onClose={closeModal}
           title={editing ? `Edit ${editing.shootId}` : 'Add Shoot'}
         >
