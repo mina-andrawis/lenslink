@@ -58,8 +58,6 @@ export default function ContactDetailPage() {
   const [showDraft, setShowDraft] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [draft, setDraft] = useState<EmailDraft | null>(null);
-  const [writingStyle, setWritingStyle] = useState('');
-  const [styleLoaded, setStyleLoaded] = useState(false);
   const [selectedLog, setSelectedLog] = useState<OutreachLog | null>(null);
 
   const fetchDetail = async () => {
@@ -119,38 +117,31 @@ export default function ContactDetailPage() {
   };
 
   const openDraftModal = async () => {
-    setShowDraft(true);
-    setDraft(null);
-
-    let resolvedStyle = writingStyle;
-    if (!styleLoaded && user) {
-      try {
-        const data = await apiFetch<{ writingStyle: string }>('/api/settings', user);
-        resolvedStyle = data.writingStyle ?? '';
-        setWritingStyle(resolvedStyle);
-      } catch { /* use empty default */ }
-      setStyleLoaded(true);
-    }
-
-    // Style already saved — skip straight to generating
-    if (resolvedStyle.trim()) {
-      generateDraft(resolvedStyle);
-    }
-    // Otherwise the modal will show the style textarea (first-time setup)
-  };
-
-  const generateDraft = async (styleOverride?: string) => {
     if (!user || !id) return;
-    const styleToUse = styleOverride !== undefined ? styleOverride : writingStyle;
     setDrafting(true);
-    setDraft(null);
     try {
       const token = await user.getIdToken();
-      await fetch('/api/settings', {
-        method: 'PUT',
+      const res = await fetch('/api/ai/draft-email', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ writingStyle: styleToUse }),
+        body: JSON.stringify({ contactId: id }),
       });
+      if (!res.ok) throw new Error(await res.text());
+      const data: EmailDraft = await res.json();
+      setDraft(data);
+      setShowDraft(true);
+    } catch {
+      toast.error('Failed to generate draft');
+    } finally {
+      setDrafting(false);
+    }
+  };
+
+  const generateDraft = async () => {
+    if (!user || !id) return;
+    setDrafting(true);
+    try {
+      const token = await user.getIdToken();
       const res = await fetch('/api/ai/draft-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -370,13 +361,17 @@ export default function ContactDetailPage() {
                       Compose
                     </button>
                     <button
-                      onClick={openDraftModal}
-                      disabled={!contact.email}
+                      onClick={() => { void openDraftModal(); }}
+                      disabled={!contact.email || drafting}
                       title={!contact.email ? 'No email address on file' : 'Draft a personalized email with AI'}
                       className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
-                      <SparklesIcon className="h-3.5 w-3.5" />
-                      Draft with AI
+                      {drafting ? (
+                        <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+                      ) : (
+                        <SparklesIcon className="h-3.5 w-3.5" />
+                      )}
+                      {drafting ? 'Writing…' : 'Draft with AI'}
                     </button>
                     <button
                       onClick={() => setShowAddLog(true)}
@@ -477,13 +472,8 @@ export default function ContactDetailPage() {
         </Modal>
 
         {/* AI Draft Modal */}
-        <Modal open={showDraft} onClose={() => !drafting && setShowDraft(false)} title="Draft with AI">
-          {drafting ? (
-            <div className="flex flex-col items-center gap-4 py-10">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
-              <p className="text-sm text-gray-600">Writing a personalized email for {detail?.contact.name}…</p>
-            </div>
-          ) : draft ? (
+        <Modal open={showDraft} onClose={() => setShowDraft(false)} title="Draft with AI">
+          {draft && (
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wide text-gray-600 mb-1">Subject</label>
@@ -503,21 +493,14 @@ export default function ContactDetailPage() {
                 />
               </div>
               <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => { void generateDraft(); }}
-                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    <ArrowPathIcon className="h-3.5 w-3.5" />
-                    Regenerate
-                  </button>
-                  <button
-                    onClick={() => setDraft(null)}
-                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    Edit style
-                  </button>
-                </div>
+                <button
+                  onClick={() => { void generateDraft(); }}
+                  disabled={drafting}
+                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 disabled:opacity-40 transition-colors"
+                >
+                  <ArrowPathIcon className={`h-3.5 w-3.5 ${drafting ? 'animate-spin' : ''}`} />
+                  {drafting ? 'Regenerating…' : 'Regenerate'}
+                </button>
                 <div className="flex gap-2">
                   <button
                     onClick={copyDraft}
@@ -542,37 +525,6 @@ export default function ContactDetailPage() {
                     {savingLog ? 'Saving…' : 'Log'}
                   </button>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Your writing style
-                  <span className="ml-1.5 text-xs font-normal text-gray-500">— set once, used for all future drafts</span>
-                </label>
-                <textarea
-                  value={writingStyle}
-                  onChange={(e) => setWritingStyle(e.target.value)}
-                  rows={8}
-                  placeholder={`Paste a few examples of how you actually write — emails, captions, DMs, anything. The more you give, the more the draft will sound like you.\n\nExample:\n"Hey! Saw your café on Instagram and absolutely love the vibe you've created. I'm a photographer based in Charleston and would love to chat about capturing some content for you…"`}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                />
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowDraft(false)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => { void generateDraft(); }}
-                  className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 transition-colors"
-                >
-                  <SparklesIcon className="h-4 w-4" />
-                  Generate Draft
-                </button>
               </div>
             </div>
           )}

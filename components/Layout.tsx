@@ -19,6 +19,7 @@ const NAV = [
   { href: '/outreach', label: 'Outreach', icon: EnvelopeIcon },
   { href: '/shoots', label: 'Shoots', icon: CalendarDaysIcon },
   { href: '/pricing', label: 'Pricing', icon: BanknotesIcon },
+  { href: '/settings', label: 'Settings', icon: CameraIcon },
 ];
 
 export default function Layout({ children }: { children: ReactNode }) {
