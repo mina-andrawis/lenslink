@@ -29,7 +29,7 @@ const ShootSchema = new Schema<IShoot>(
     companyName: { type: String, trim: true },
     type: {
       type: String,
-      enum: ['Proposal', 'Branding', 'Event', 'Graduation', 'Real Estate', 'Family Photoshoot', 'Portrait', 'Headshots'],
+      enum: ['Proposal', 'Branding', 'Event', 'Graduation', 'Real Estate', 'Family Photoshoot', 'Portrait', 'Headshots', 'Couples', 'Wedding'],
       required: true,
     },
     contractSigned: { type: Boolean, default: null },

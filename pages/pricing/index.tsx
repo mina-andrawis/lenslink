@@ -3,18 +3,19 @@ import Layout from '@/components/Layout';
 import AuthGuard from '@/components/AuthGuard';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/api-client';
-import { PRICING_TIERS, SHOOT_TYPE_TO_PRICING } from '@/lib/pricing-data';
+import { PRICING_PILLARS, SHOOT_TYPE_TO_PRICING } from '@/lib/pricing-data';
 import type { Shoot } from '@/types';
 
 interface RateComparison {
   shootType: string;
   targetRate: number;
+  rateLabel?: string;
   avgEffectiveRate: number | null;
   shootCount: number;
 }
 
 function buildComparisons(shoots: Shoot[]): RateComparison[] {
-  const currentTier = PRICING_TIERS[0];
+  const allRates = PRICING_PILLARS.flatMap((p) => p.rates);
   const grouped: Record<string, number[]> = {};
 
   for (const s of shoots) {
@@ -26,11 +27,12 @@ function buildComparisons(shoots: Shoot[]): RateComparison[] {
     grouped[pricingType].push(s.feeCharged / totalHrs);
   }
 
-  return currentTier.rates.map((r) => {
+  return allRates.map((r) => {
     const rates = grouped[r.shootType] ?? [];
     return {
       shootType: r.shootType,
       targetRate: r.hourlyRate,
+      rateLabel: r.rateLabel,
       avgEffectiveRate: rates.length ? rates.reduce((a, b) => a + b, 0) / rates.length : null,
       shootCount: rates.length,
     };
@@ -54,7 +56,6 @@ export default function PricingPage() {
   const { user } = useAuth();
   const [shoots, setShoots] = useState<Shoot[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -73,6 +74,42 @@ export default function PricingPage() {
             <h1 className="text-2xl font-bold text-gray-900">Pricing</h1>
             <p className="text-sm text-gray-700">Rate reference and comparison against your actual shoots</p>
           </div>
+
+          {/* Pricing pillars */}
+          <section>
+            <h2 className="font-semibold text-gray-900 mb-3">Rate Pillars</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {PRICING_PILLARS.map((pillar) => (
+                <div key={pillar.name} className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col">
+                  <div className="px-6 py-4 border-b bg-gray-50">
+                    <h3 className="font-semibold text-gray-900">{pillar.name}</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">{pillar.description}</p>
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <th className="px-6 py-2">Type</th>
+                        <th className="px-6 py-2 text-right whitespace-nowrap">Rate</th>
+                        <th className="px-6 py-2 whitespace-nowrap">Delivery</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {pillar.rates.map((r) => (
+                        <tr key={r.shootType} className="hover:bg-gray-50 align-top">
+                          <td className="px-6 py-3">
+                            <div className="font-medium text-gray-900">{r.shootType}</div>
+                            <div className="text-xs text-gray-500 mt-0.5 leading-snug">{r.notes}</div>
+                          </td>
+                          <td className="px-6 py-3 text-right font-semibold text-indigo-600 whitespace-nowrap">${r.hourlyRate}/hr</td>
+                          <td className="px-6 py-3 text-gray-600 text-xs whitespace-nowrap">{r.deliveryCap}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* Rate comparison */}
           <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -99,7 +136,7 @@ export default function PricingPage() {
                   {comparisons.map((c) => (
                     <tr key={c.shootType} className="hover:bg-gray-50">
                       <td className="px-6 py-3 font-medium text-gray-900">{c.shootType}</td>
-                      <td className="px-6 py-3 text-right text-gray-600">${c.targetRate}/hr</td>
+                      <td className="px-6 py-3 text-right text-gray-600">{c.rateLabel ?? `$${c.targetRate}/hr`}</td>
                       <td className="px-6 py-3 text-right font-semibold">
                         {c.avgEffectiveRate != null ? (
                           <span className={c.avgEffectiveRate >= c.targetRate ? 'text-green-600' : 'text-red-500'}>
@@ -120,55 +157,6 @@ export default function PricingPage() {
                 </tbody>
               </table>
             )}
-          </section>
-
-          {/* Tier reference tables */}
-          <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="border-b px-6 py-4">
-              <h2 className="font-semibold text-gray-900">Rate Tiers — Reference</h2>
-            </div>
-
-            {/* Tier tabs */}
-            <div className="flex border-b">
-              {PRICING_TIERS.map((tier, i) => (
-                <button
-                  key={tier.name}
-                  onClick={() => setActiveTab(i)}
-                  className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                    activeTab === i
-                      ? 'border-indigo-600 text-indigo-600'
-                      : 'border-transparent text-gray-700 hover:text-gray-700'
-                  }`}
-                >
-                  {tier.name}
-                </button>
-              ))}
-            </div>
-
-            <div className="px-6 py-3 text-xs text-amber-700 bg-amber-50 border-b">
-              {PRICING_TIERS[activeTab].trigger}
-            </div>
-
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-700">
-                  <th className="px-6 py-3">Shoot Type</th>
-                  <th className="px-6 py-3 text-right">Hourly Rate</th>
-                  <th className="px-6 py-3">Delivery Cap</th>
-                  <th className="px-6 py-3">Target Clients / Notes</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {PRICING_TIERS[activeTab].rates.map((r) => (
-                  <tr key={r.shootType} className="hover:bg-gray-50">
-                    <td className="px-6 py-3 font-medium text-gray-900">{r.shootType}</td>
-                    <td className="px-6 py-3 text-right font-semibold text-indigo-600">${r.hourlyRate}/hr</td>
-                    <td className="px-6 py-3 text-gray-700">{r.deliveryCap}</td>
-                    <td className="px-6 py-3 text-gray-700">{r.notes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </section>
         </div>
       </Layout>

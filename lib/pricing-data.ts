@@ -1,66 +1,61 @@
 export interface PricingRate {
   shootType: string;
   hourlyRate: number;
+  rateLabel?: string;  // overrides "$X/hr" display when set (e.g. flat fees)
   deliveryCap: string;
   notes: string;
 }
 
-export interface PricingTier {
+export interface PricingPillar {
   name: string;
-  trigger: string;
+  description: string;
   rates: PricingRate[];
 }
 
-export const PRICING_TIERS: PricingTier[] = [
+export const PRICING_PILLARS: PricingPillar[] = [
   {
-    name: 'Current Operational Rates',
-    trigger: 'Active now — baseline rates',
+    name: 'Couples & Weddings',
+    description: 'Milestone moments, beautifully documented.',
     rates: [
-      { shootType: 'Proposal',           hourlyRate: 225, deliveryCap: '20–30 images/hr', notes: 'Individual couples & private engagement setups.' },
-      { shootType: 'Branding',           hourlyRate: 125, deliveryCap: '15–20 images/hr', notes: 'Local creators and small businesses needing social content.' },
-      { shootType: 'Event',              hourlyRate: 100, deliveryCap: '30–40 images/hr', notes: 'Parties, small gigs, and local live music coverage.' },
-      { shootType: 'Graduation',         hourlyRate: 150, deliveryCap: '15–25 images/hr', notes: 'Individual senior portraits on campus (30-min block).' },
-      { shootType: 'Real Estate',        hourlyRate: 125, deliveryCap: '15–25 images/hr', notes: 'Standard residential listings and rental properties.' },
-      { shootType: 'Family Photoshoot',  hourlyRate: 175, deliveryCap: '15–25 images/hr', notes: 'Outdoor or on-location family group portraits.' },
-      { shootType: 'Portraits/Headshots',hourlyRate: 150, deliveryCap: '5–10 images/hr',  notes: 'Individual creative profiles or standard corporate headshots.' },
+      { shootType: 'Proposal',  hourlyRate: 250, deliveryCap: '20–30 total images', notes: 'Private setups, scouting assistance, and curated fast delivery.' },
+      { shootType: 'Couples',   hourlyRate: 125, deliveryCap: '20–30 images/hr',    notes: 'On-location couple portraits and engagement sessions.' },
+      { shootType: 'Wedding',   hourlyRate: 250, deliveryCap: '40–50 images/hr',    notes: 'Intimate weddings and elopements. Full or partial day. Minimum 4-hour booking.' },
     ],
   },
   {
-    name: 'Mid-Level Tier',
-    trigger: 'Trigger: 15–20 paid shoots per category or full portfolio',
+    name: 'Portraits & Creative Branding',
+    description: 'Editorial work for individuals and growing brands.',
     rates: [
-      { shootType: 'Proposal',           hourlyRate: 350, deliveryCap: '30–40 images/hr', notes: 'Trigger after building a dedicated gallery of 10+ high-end setups.' },
-      { shootType: 'Branding',           hourlyRate: 200, deliveryCap: '20–35 images/hr', notes: 'Apply to established regional brands and marketing agencies.' },
-      { shootType: 'Event',              hourlyRate: 175, deliveryCap: '40–50 images/hr', notes: 'Larger festival blocks or regional multi-day music coverage.' },
-      { shootType: 'Graduation',         hourlyRate: 200, deliveryCap: '20–30 images/session', notes: 'Scaled rate for rapid execution across multiple campus landmarks.' },
-      { shootType: 'Real Estate',        hourlyRate: 200, deliveryCap: '25–40 images/hr', notes: 'Mid-tier commercial listings and high-end residential spaces.' },
-      { shootType: 'Family Photoshoot',  hourlyRate: 250, deliveryCap: '20–30 images/hr', notes: 'Accounts for increased culling time with larger group dynamics.' },
-      { shootType: 'Portraits/Headshots',hourlyRate: 225, deliveryCap: '10–15 images/hr', notes: 'Advanced lookbooks and multi-outfit studio profiles.' },
+      { shootType: 'Portraits & Headshots', hourlyRate: 175, deliveryCap: '10–15 images/hr', notes: 'Corporate headshots, creative profiles, and editorial portraits.' },
+      { shootType: 'Branding',              hourlyRate: 175, deliveryCap: '10–20 images/hr', notes: 'Environmental portraiture for local creators and small businesses.' },
+      { shootType: 'Graduation',            hourlyRate: 150, deliveryCap: '15–20 images/hr', notes: 'Individual senior portraits on campus. 30-min session blocks.' },
     ],
   },
   {
-    name: 'Senior Tier',
-    trigger: 'Trigger: Flawless reputation, distinct style & premium accounts',
+    name: 'Events & Live Music',
+    description: 'High-energy coverage for every occasion.',
     rates: [
-      { shootType: 'Proposal',           hourlyRate: 500, deliveryCap: '45+ images/hr', notes: 'Luxury high-end requests requiring rapid story delivery.' },
-      { shootType: 'Branding',           hourlyRate: 300, deliveryCap: '40+ images/hr', notes: 'Commercial productions requiring advanced licensing and asset bundles.' },
-      { shootType: 'Event',              hourlyRate: 250, deliveryCap: '60+ images/hr', notes: 'Premium large-scale festivals demanding rapid turnaround guarantees.' },
-      { shootType: 'Graduation',         hourlyRate: 400, deliveryCap: '35+ images/session', notes: 'Premium fast-track campus packages with flawless styling control.' },
-      { shootType: 'Real Estate',        hourlyRate: 300, deliveryCap: '40+ images/hr', notes: 'Luxury estates, HDR bracketing, and advanced media.' },
-      { shootType: 'Family Photoshoot',  hourlyRate: 350, deliveryCap: '35–50 images/hr', notes: 'Premium style editing and deep group retouching workflows.' },
-      { shootType: 'Portraits/Headshots',hourlyRate: 325, deliveryCap: '15–20 images/hr', notes: 'High-end editorial and executive corporate headshot accounts.' },
+      { shootType: 'Events & Live Music', hourlyRate: 150, deliveryCap: '25–35 images/hr', notes: 'Parties, corporate gatherings, festivals, and local music coverage.' },
+    ],
+  },
+  {
+    name: 'Commercial & Real Estate',
+    description: 'Clean, professional listing and property photography.',
+    rates: [
+      { shootType: 'Real Estate', hourlyRate: 100, rateLabel: '$100 flat', deliveryCap: '20+ final frames', notes: 'Flat baseline for listings up to 2,000 sq ft. Standard residential and rental properties.' },
     ],
   },
 ];
 
-// Maps shoot model types to pricing category names (Portrait + Headshots share one row)
+// Maps Shoot model types to PricingRate.shootType values
 export const SHOOT_TYPE_TO_PRICING: Record<string, string> = {
-  Proposal:          'Proposal',
-  Branding:          'Branding',
-  Event:             'Event',
-  Graduation:        'Graduation',
-  'Real Estate':     'Real Estate',
-  'Family Photoshoot': 'Family Photoshoot',
-  Portrait:          'Portraits/Headshots',
-  Headshots:         'Portraits/Headshots',
+  Proposal:        'Proposal',
+  Couples:         'Couples',
+  Wedding:         'Wedding',
+  Portrait:        'Portraits & Headshots',
+  Headshots:       'Portraits & Headshots',
+  Branding:        'Branding',
+  Graduation:      'Graduation',
+  Event:           'Events & Live Music',
+  'Real Estate':   'Real Estate',
 };
