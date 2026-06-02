@@ -69,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   ].filter(Boolean).join('\n');
 
   const message = await anthropic.messages.create({
-    model: 'claude-opus-4-7',
+    model: 'claude-opus-4-8',
     max_tokens: 1024,
     system: buildSystemPrompt(writingStyle),
     tools: [
