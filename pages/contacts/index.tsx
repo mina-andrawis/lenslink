@@ -1,13 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   PlusIcon, Squares2X2Icon, ListBulletIcon, MagnifyingGlassIcon,
-  EnvelopeIcon, PhoneIcon, GlobeAltIcon,
+  EnvelopeIcon, PhoneIcon, GlobeAltIcon, ArrowUpTrayIcon, XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
 import AuthGuard from '@/components/AuthGuard';
 import Modal from '@/components/ui/Modal';
 import ContactForm from '@/components/contacts/ContactForm';
+import CsvImportModal from '@/components/contacts/CsvImportModal';
 import PipelineBoard from '@/components/contacts/PipelineBoard';
 import { StatusBadge } from '@/components/ui/Badge';
 import { useAuth } from '@/context/AuthContext';
@@ -112,6 +113,7 @@ export default function ContactsPage() {
   const [view, setView] = useState<ViewMode>('pipeline');
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
+  const [showImport, setShowImport] = useState(false);
 
   const fetchContacts = useCallback(async () => {
     if (!user) return;
@@ -138,7 +140,6 @@ export default function ContactsPage() {
 
   const handleStatusChange = async (contactId: string, newStatus: ContactStatus) => {
     if (!user) return;
-    // Optimistic update — move the card instantly
     setContacts(prev => prev.map(c => c._id === contactId ? { ...c, status: newStatus } : c));
     try {
       await apiFetch(`/api/contacts/${contactId}`, user, {
@@ -147,6 +148,18 @@ export default function ContactsPage() {
       });
     } catch {
       toast.error('Failed to update status');
+      fetchContacts();
+    }
+  };
+
+  const handleDelete = async (contactId: string) => {
+    if (!user) return;
+    setContacts(prev => prev.filter(c => c._id !== contactId));
+    try {
+      await apiFetch(`/api/contacts/${contactId}`, user, { method: 'DELETE' });
+      toast.success('Contact deleted');
+    } catch {
+      toast.error('Failed to delete contact');
       fetchContacts();
     }
   };
@@ -172,13 +185,22 @@ export default function ContactsPage() {
               <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
               <p className="text-sm text-gray-700">{tabLabel}</p>
             </div>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
-            >
-              <PlusIcon className="h-4 w-4" />
-              {tab === 'network' ? 'Add Photographer' : 'Add Contact'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowImport(true)}
+                className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <ArrowUpTrayIcon className="h-4 w-4" />
+                Import CSV
+              </button>
+              <button
+                onClick={() => setShowAdd(true)}
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+              >
+                <PlusIcon className="h-4 w-4" />
+                {tab === 'network' ? 'Add Photographer' : 'Add Contact'}
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
@@ -244,7 +266,7 @@ export default function ContactsPage() {
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
                 </div>
               ) : view === 'pipeline' ? (
-                <PipelineBoard contacts={activeClients} onStatusChange={handleStatusChange} />
+                <PipelineBoard contacts={activeClients} onStatusChange={handleStatusChange} onDelete={handleDelete} />
               ) : (
                 <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -266,7 +288,7 @@ export default function ContactsPage() {
                         </tr>
                       )}
                       {activeClients.map((c) => (
-                        <tr key={c._id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={c._id} className="hover:bg-gray-50 transition-colors group">
                           <td className="px-4 py-3 text-sm font-medium text-gray-900">{c.name}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{c.email}</td>
                           <td className="px-4 py-3 text-sm text-gray-700">{c.businessName ?? '—'}</td>
@@ -275,9 +297,17 @@ export default function ContactsPage() {
                             {c.followUpDate ? format(new Date(c.followUpDate), 'MMM d, yyyy') : '—'}
                           </td>
                           <td className="px-4 py-3">
-                            <Link href={`/contacts/${c._id}`} className="text-xs text-indigo-600 hover:underline">
-                              View
-                            </Link>
+                            <div className="flex items-center gap-3">
+                              <Link href={`/contacts/${c._id}`} className="text-xs text-indigo-600 hover:underline">
+                                View
+                              </Link>
+                              <button
+                                onClick={() => handleDelete(c._id)}
+                                className="text-gray-300 hover:text-red-500 transition-colors"
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -311,7 +341,7 @@ export default function ContactsPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {pastClients.map((c) => (
-                      <tr key={c._id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={c._id} className="hover:bg-gray-50 transition-colors group">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">{c.name}</td>
                         <td className="px-4 py-3 text-sm text-gray-700">{c.email}</td>
                         <td className="px-4 py-3 text-sm text-gray-700">{c.businessName ?? '—'}</td>
@@ -319,9 +349,17 @@ export default function ContactsPage() {
                           {c.lastContactedAt ? format(new Date(c.lastContactedAt), 'MMM d, yyyy') : '—'}
                         </td>
                         <td className="px-4 py-3">
-                          <Link href={`/contacts/${c._id}`} className="text-xs text-indigo-600 hover:underline">
-                            View
-                          </Link>
+                          <div className="flex items-center gap-3">
+                            <Link href={`/contacts/${c._id}`} className="text-xs text-indigo-600 hover:underline">
+                              View
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(c._id)}
+                              className="text-gray-300 hover:text-red-500 transition-colors"
+                            >
+                              <XMarkIcon className="h-4 w-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -361,6 +399,12 @@ export default function ContactsPage() {
             onCancel={() => setShowAdd(false)}
           />
         </Modal>
+
+        <CsvImportModal
+          open={showImport}
+          onClose={() => setShowImport(false)}
+          onImported={fetchContacts}
+        />
       </Layout>
     </AuthGuard>
   );

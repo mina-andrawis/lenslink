@@ -14,13 +14,13 @@ Mina shoots: portraits, headshots, branding, events, real estate, family session
 Write warm, genuine outreach that doesn't feel templated. Show you've actually looked at their business.
 
 Rules:
-- 150–250 words total
+- 2–3 paragraphs, no longer — keep it easy to read and not overwhelming
 - Open with something specific to them — a real observation, not empty flattery
-- Explain concretely why professional photography would benefit their specific type of business
-- One clear, low-pressure ask at the end (15-minute call, quick portfolio peek, coffee)
+- Explain concisely why professional photography would benefit their specific type of business
+- End with a single low-pressure ask via email only — no calls, no meetings, no "quick chat" or "15-minute call"
 - Offer a discounted rate for first-time clients
 - Sign off as: Mina
-- NEVER use: "I hope this email finds you well", "reaching out to", "circle back", "touch base", "synergy"`;
+- NEVER use: "I hope this email finds you well", "reaching out to", "circle back", "touch base", "synergy", "hop on a call", "quick call", "chat", "meet up"`;
 
 function buildSystemPrompt(writingStyle: string): string {
   if (!writingStyle.trim()) return BASE_SYSTEM;
@@ -42,7 +42,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userId = await getUserId(req, res);
   if (!userId) return;
 
-  const { contactId } = req.body as { contactId: string };
+  const { contactId, currentDraft, refinePrompt } = req.body as {
+    contactId: string;
+    currentDraft?: { subject: string; body: string };
+    refinePrompt?: string;
+  };
   if (!contactId) return res.status(400).json({ error: 'contactId required' });
 
   await connectDB();
@@ -87,12 +91,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     ],
     tool_choice: { type: 'tool' as const, name: 'draft_email' },
-    messages: [
-      {
-        role: 'user',
-        content: `Draft a cold outreach email from Mina to this contact:\n\n${details}`,
-      },
-    ],
+    messages: currentDraft && refinePrompt
+      ? [
+          { role: 'user' as const, content: `Draft a cold outreach email from Mina to this contact:\n\n${details}` },
+          { role: 'assistant' as const, content: `Subject: ${currentDraft.subject}\n\n${currentDraft.body}` },
+          { role: 'user' as const, content: `Please revise this draft with the following feedback: ${refinePrompt}` },
+        ]
+      : [
+          { role: 'user' as const, content: `Draft a cold outreach email from Mina to this contact:\n\n${details}` },
+        ],
   });
 
   const toolUse = message.content.find(b => b.type === 'tool_use');

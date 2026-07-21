@@ -14,6 +14,7 @@ export interface IContact extends Document {
   notes?: string;
   lastContactedAt?: Date;
   followUpDate?: Date;
+  eventDate?: Date;
   tags: string[];
   userId: string;
   createdAt: Date;
@@ -39,6 +40,7 @@ const ContactSchema = new Schema<IContact>(
     notes: { type: String },
     lastContactedAt: { type: Date },
     followUpDate: { type: Date },
+    eventDate: { type: Date },
     tags: [{ type: String }],
     userId: { type: String, required: true },
   },

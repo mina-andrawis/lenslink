@@ -3,17 +3,18 @@ import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import type { Contact, ContactStatus } from '@/types';
 import { PIPELINE_STAGES } from '@/types';
-import { EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon, XMarkIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 
 interface PipelineBoardProps {
   contacts: Contact[];
   onStatusChange?: (contactId: string, newStatus: ContactStatus) => void;
+  onDelete?: (contactId: string) => void;
 }
 
 // Past clients get their own tab — keep them off the board
 const BOARD_STAGES = PIPELINE_STAGES.filter(s => s.key !== 'past_client');
 
-export default function PipelineBoard({ contacts, onStatusChange }: PipelineBoardProps) {
+export default function PipelineBoard({ contacts, onStatusChange, onDelete }: PipelineBoardProps) {
   const router = useRouter();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
@@ -60,11 +61,24 @@ export default function PipelineBoard({ contacts, onStatusChange }: PipelineBoar
                 }}
                 onDragEnd={() => { setDraggingId(null); setDropTarget(null); }}
                 onClick={() => router.push(`/contacts/${contact._id}`)}
-                className={`rounded-xl border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none ${
+                className={`relative group rounded-xl border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none ${
                   draggingId === contact._id ? 'opacity-40 scale-95' : ''
                 }`}
               >
-                <p className="font-medium text-sm text-gray-900 truncate">{contact.name}</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete?.(contact._id); }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="absolute top-2 right-2 rounded-full p-0.5 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                </button>
+
+                {contact.eventDate && (
+                  <div className="mb-2 -mx-3 -mt-3 rounded-t-xl bg-indigo-600 px-3 py-1.5 text-center text-xs font-bold text-white tracking-wide">
+                    {format(new Date(contact.eventDate), 'EEE, MMM d')}
+                  </div>
+                )}
+                <p className="font-medium text-sm text-gray-900 truncate pr-5">{contact.name}</p>
                 {contact.businessName && (
                   <p className="text-xs text-gray-700 truncate">{contact.businessName}</p>
                 )}
@@ -79,8 +93,11 @@ export default function PipelineBoard({ contacts, onStatusChange }: PipelineBoar
                   </div>
                 )}
                 {contact.followUpDate && (
-                  <div className="mt-2 text-xs text-amber-600 font-medium">
-                    Follow up: {format(new Date(contact.followUpDate), 'MMM d')}
+                  <div className="mt-2">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                      <CalendarDaysIcon className="h-3 w-3" />
+                      {format(new Date(contact.followUpDate), 'MMM d')}
+                    </span>
                   </div>
                 )}
                 {contact.tags.length > 0 && (

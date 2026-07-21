@@ -58,6 +58,7 @@ export default function ContactDetailPage() {
   const [showDraft, setShowDraft] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [draft, setDraft] = useState<EmailDraft | null>(null);
+  const [refinePrompt, setRefinePrompt] = useState('');
   const [selectedLog, setSelectedLog] = useState<OutreachLog | null>(null);
 
   const fetchDetail = async () => {
@@ -137,7 +138,7 @@ export default function ContactDetailPage() {
     }
   };
 
-  const generateDraft = async () => {
+  const generateDraft = async (prompt?: string) => {
     if (!user || !id) return;
     setDrafting(true);
     try {
@@ -145,11 +146,15 @@ export default function ContactDetailPage() {
       const res = await fetch('/api/ai/draft-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ contactId: id }),
+        body: JSON.stringify({
+          contactId: id,
+          ...(prompt && draft ? { currentDraft: draft, refinePrompt: prompt } : {}),
+        }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data: EmailDraft = await res.json();
       setDraft(data);
+      setRefinePrompt('');
     } catch {
       toast.error('Failed to generate draft');
     } finally {
@@ -492,39 +497,49 @@ export default function ContactDetailPage() {
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
                 />
               </div>
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex gap-2">
+                <input
+                  value={refinePrompt}
+                  onChange={(e) => setRefinePrompt(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && refinePrompt.trim()) void generateDraft(refinePrompt); }}
+                  placeholder="e.g. make it shorter, focus on the event, sound more casual…"
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
                 <button
-                  onClick={() => { void generateDraft(); }}
+                  onClick={() => void generateDraft(refinePrompt.trim() || undefined)}
                   disabled={drafting}
-                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 disabled:opacity-40 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-2 text-sm font-medium text-violet-600 hover:bg-violet-100 disabled:opacity-40 transition-colors shrink-0"
                 >
-                  <ArrowPathIcon className={`h-3.5 w-3.5 ${drafting ? 'animate-spin' : ''}`} />
-                  {drafting ? 'Regenerating…' : 'Regenerate'}
+                  {drafting
+                    ? <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                    : <SparklesIcon className="h-4 w-4" />}
+                  {drafting ? 'Writing…' : refinePrompt.trim() ? 'Refine' : 'Regenerate'}
                 </button>
-                <div className="flex gap-2">
-                  <button
-                    onClick={copyDraft}
-                    className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <ClipboardDocumentIcon className="h-4 w-4" />
-                    Copy
-                  </button>
-                  <button
-                    onClick={() => { void openInMail(); }}
-                    className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
-                  >
-                    <EnvelopeIcon className="h-4 w-4" />
-                    Open in Mail
-                  </button>
-                  <button
-                    onClick={logDraft}
-                    disabled={savingLog}
-                    className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50 transition-colors"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    {savingLog ? 'Saving…' : 'Log'}
-                  </button>
-                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  onClick={copyDraft}
+                  className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <ClipboardDocumentIcon className="h-4 w-4" />
+                  Copy
+                </button>
+                <button
+                  onClick={() => { void openInMail(); }}
+                  className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+                >
+                  <EnvelopeIcon className="h-4 w-4" />
+                  Open in Mail
+                </button>
+                <button
+                  onClick={logDraft}
+                  disabled={savingLog}
+                  className="flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50 transition-colors"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  {savingLog ? 'Saving…' : 'Log'}
+                </button>
               </div>
             </div>
           )}

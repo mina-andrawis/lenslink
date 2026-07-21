@@ -23,6 +23,7 @@ export interface Contact {
   notes?: string;
   lastContactedAt?: string;
   followUpDate?: string;
+  eventDate?: string;
   tags: string[];
   userId: string;
   createdAt: string;
